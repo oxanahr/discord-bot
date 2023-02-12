@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github/oxanahr/discordBot/cmd/context"
+	"github.com/oxanahr/discord-bot/cmd/context"
 	"log"
 	"os"
 	"time"
@@ -53,6 +53,15 @@ func Mention(userID string) string {
 		return ""
 	}
 	return user.Mention()
+}
+
+func Username(userID string) string {
+	user, err := context.Dg.User(userID)
+	if err != nil {
+		sentry.CaptureException(err)
+		return ""
+	}
+	return user.Username
 }
 
 func SendChannelFile(channelID string, filepath string, name string) {

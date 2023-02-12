@@ -25,6 +25,7 @@ func main() {
 	// Start the bot
 	bot.Start()
 
+	// Start the scheduler
 	scheduler := tasks.New()
 	defer scheduler.Stop()
 
@@ -38,6 +39,7 @@ func main() {
 			return nil
 		},
 	})
+
 	if err != nil {
 		fmt.Println(err)
 	}

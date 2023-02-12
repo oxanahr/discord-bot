@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	"github/oxanahr/discordBot/cmd/database"
+	"github.com/oxanahr/discord-bot/cmd/database"
 	"time"
 )
 
@@ -15,6 +15,7 @@ type Task struct {
 	State          string     `json:"state" gorm:"not null"`
 	CreatedAt      time.Time  `json:"createdAt" gorm:"not null"`
 	Deadline       *time.Time `json:"deadline"`
+	Comments       []Comment  `json:"comments"`
 }
 
 func (t *Task) Create() error {
@@ -31,8 +32,12 @@ func CompleteTask(id uint64) error {
 	return database.DB.Model(&Task{}).Where("id = ?", id).Update("state", "completed").Error
 }
 
-func GetTasks(assignedUserID *string, sort string, soon bool) ([]Task, error) {
-	q := database.DB.Model(&Task{}).Where("state != ?", "completed")
+func AssignTask(id uint64, userID string) error {
+	return database.DB.Model(&Task{}).Where("id = ?", id).Update("assigned_user_id", userID).Error
+}
+
+func GetTasks(assignedUserID *string, sort string, soon bool, unassigned bool) ([]Task, error) {
+	q := database.DB.Model(&Task{}).Preload("Comments").Where("state != ?", "completed")
 	if assignedUserID != nil {
 		q.Where("assigned_user_id = ?", *assignedUserID)
 	}
@@ -48,60 +53,36 @@ func GetTasks(assignedUserID *string, sort string, soon bool) ([]Task, error) {
 		fmt.Println(monday, sunday)
 		q.Where("CAST(deadline AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)", monday, sunday)
 	}
+	if unassigned {
+		q.Where("assigned_user_id is null")
+	}
 	if sort == "deadline" {
-		q.Order("deadline desc")
+		q.Order("deadline is null, deadline")
 	} else if sort == "priority" {
 		q.Order("priority desc")
 	}
-	rows, err := q.Rows()
-	defer rows.Close()
-	if err != nil {
-		return nil, err
-	}
-	result := []Task{}
-	for rows.Next() {
-		var t Task
-		database.DB.ScanRows(rows, &t)
-		result = append(result, t)
-	}
-	return result, nil
+	var tasks []Task
+	q.Find(&tasks)
+	return tasks, nil
 }
 
 func GetTasksEndingTomorrow() ([]Task, error) {
-	q := database.DB.Model(&Task{}).
+	q := database.DB.Model(&Task{}).Preload("Comments").
 		Where("state != ?", "completed").
 		Where("assigned_user_id is not null").
 		Where("CAST(deadline AS DATE) = CAST(? AS DATE)", time.Now().Add(24*time.Hour))
 
-	rows, err := q.Rows()
-	defer rows.Close()
-	if err != nil {
-		return nil, err
-	}
-	result := []Task{}
-	for rows.Next() {
-		var t Task
-		database.DB.ScanRows(rows, &t)
-		result = append(result, t)
-	}
-	return result, nil
+	var tasks []Task
+	q.Find(&tasks)
+	return tasks, nil
 }
 
 func GetInProgressTasks() ([]Task, error) {
-	q := database.DB.Model(&Task{}).
+	q := database.DB.Model(&Task{}).Preload("Comments").
 		Where("state = ?", "in_progress").
 		Where("assigned_user_id is not null")
 
-	rows, err := q.Rows()
-	defer rows.Close()
-	if err != nil {
-		return nil, err
-	}
-	result := []Task{}
-	for rows.Next() {
-		var t Task
-		database.DB.ScanRows(rows, &t)
-		result = append(result, t)
-	}
-	return result, nil
+	var tasks []Task
+	q.Find(&tasks)
+	return tasks, nil
 }
