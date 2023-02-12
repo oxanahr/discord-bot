@@ -28,7 +28,6 @@ func Load() {
 	if err != nil {
 		log.Fatalln(" ERROR: Error loading .env file")
 	}
-	//root:1234@tcp(localhost:3306)/discordBot?parseTime=true
 	config = &configuration{
 		BotPrefix:              os.Getenv("BOT_PREFIX"),
 		BotStatus:              os.Getenv("BOT_STATUS"),

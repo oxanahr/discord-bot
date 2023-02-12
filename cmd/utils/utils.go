@@ -14,14 +14,14 @@ import (
 func SendChannelMessage(channelID string, message string) {
 	_, err := context.Dg.ChannelMessageSend(channelID, message)
 	if err != nil {
-		sentry.CaptureException(err)
+		log.Fatalln(err)
 	}
 }
 
 func SendPrivateMessage(userID string, message string) {
 	channel, err := context.Dg.UserChannelCreate(userID)
 	if err != nil {
-		sentry.CaptureException(err)
+		log.Fatalln(err)
 		return
 	}
 	SendChannelMessage(channel.ID, message)
@@ -496,3 +496,11 @@ var (
 	<-stop
 	log.Println("Graceful shutdown")
 }*/
+
+func Padding(s string, p int) int {
+	padding := 0
+	if len(s)%p != 0 {
+		padding = p * (len(s)/20 + 1)
+	}
+	return padding
+}
