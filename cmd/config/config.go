@@ -26,7 +26,7 @@ var config *configuration
 func Load() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalln("Error loading .env file")
+		log.Fatalln(" ERROR: Error loading .env file")
 	}
 	//root:1234@tcp(localhost:3306)/discordBot?parseTime=true
 	config = &configuration{

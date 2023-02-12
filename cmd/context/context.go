@@ -8,7 +8,7 @@ import (
 
 var Dg *discordgo.Session
 
-// Initializing discord session
+// Initialize Initializing discord session
 func Initialize(discordToken string) {
 	var err error
 	Dg, err = discordgo.New("Bot " + discordToken)
@@ -18,7 +18,7 @@ func Initialize(discordToken string) {
 	}
 }
 
-// Creating a connection
+// OpenConnection Creating a connection
 func OpenConnection() {
 	if err := Dg.Open(); err != nil {
 		log.Fatalln("ERROR: unable to open connection,", err)

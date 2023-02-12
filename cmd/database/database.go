@@ -38,6 +38,6 @@ func Connect() {
 	}
 
 	if err != nil {
-		log.Fatalln("ERR: Could not connect with the database!")
+		log.Fatalln("ERROR: Could not connect with the database!")
 	}
 }

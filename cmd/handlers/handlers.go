@@ -137,7 +137,12 @@ const help string = "```Current commands are:\n\ttasks\n\tadd task <task name>\n
 //}
 
 func PingUsers() error {
-	tasks, _ := models.GetTasksEndingTomorrow() //handle err
+	tasks, err := models.GetTasksEndingTomorrow()
+	if err != nil {
+		log.Println("Failed getting tasks ending tomorrow ", err)
+		return err
+	}
+
 	log.Println("ping")
 
 	for _, t := range tasks {
