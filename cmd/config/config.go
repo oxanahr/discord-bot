@@ -7,15 +7,16 @@ import (
 )
 
 type configuration struct {
-	BotPrefix           string
-	BotStatus           string
-	BotGuildJoinMessage string
-	DiscordToken        string
-	DBUser              string
-	DBPassword          string
-	DBSchema            string
-	DBHost              string
-	DBPort              string
+	BotPrefix              string
+	BotStatus              string
+	BotGuildJoinMessage    string
+	DiscordToken           string
+	DBUser                 string
+	DBPassword             string
+	DBSchema               string
+	DBHost                 string
+	DBPort                 string
+	ServerGeneralChannelID string
 }
 
 // config contains all environment variables that should be included in .env
@@ -29,15 +30,16 @@ func Load() {
 	}
 	//root:1234@tcp(localhost:3306)/discordBot?parseTime=true
 	config = &configuration{
-		BotPrefix:           os.Getenv("BOT_PREFIX"),
-		BotStatus:           os.Getenv("BOT_STATUS"),
-		BotGuildJoinMessage: os.Getenv("BOT_GUILD_JOIN_MESSAGE"),
-		DiscordToken:        os.Getenv("DISCORD_TOKEN"),
-		DBUser:              os.Getenv("DB_USER"),
-		DBPassword:          os.Getenv("DB_PASSWORD"),
-		DBSchema:            os.Getenv("DB_SCHEMA"),
-		DBHost:              os.Getenv("DB_HOST"),
-		DBPort:              os.Getenv("DB_PORT"),
+		BotPrefix:              os.Getenv("BOT_PREFIX"),
+		BotStatus:              os.Getenv("BOT_STATUS"),
+		BotGuildJoinMessage:    os.Getenv("BOT_GUILD_JOIN_MESSAGE"),
+		DiscordToken:           os.Getenv("DISCORD_TOKEN"),
+		DBUser:                 os.Getenv("DB_USER"),
+		DBPassword:             os.Getenv("DB_PASSWORD"),
+		DBSchema:               os.Getenv("DB_SCHEMA"),
+		DBHost:                 os.Getenv("DB_HOST"),
+		DBPort:                 os.Getenv("DB_PORT"),
+		ServerGeneralChannelID: os.Getenv("SERVER_GENERAL_CHANNEL_ID"),
 	}
 }
 
@@ -49,8 +51,8 @@ func GetBotStatus() string {
 	return config.BotStatus
 }
 
-func GetBotGuildJoinMessage() string {
-	return config.BotGuildJoinMessage
+func GetServerGeneralChannelID() string {
+	return config.ServerGeneralChannelID
 }
 
 func GetDiscordToken() string {

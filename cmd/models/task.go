@@ -1,8 +1,8 @@
 package models
 
 import (
-	"fmt"
 	"github.com/oxanahr/discord-bot/cmd/database"
+	"log"
 	"time"
 )
 
@@ -50,7 +50,7 @@ func GetTasks(assignedUserID *string, sort string, soon bool, unassigned bool) (
 		//TODO is this working ok?
 		monday := now.Add(-1 * weekday * 24 * time.Hour)
 		sunday := now.Add((6 - weekday) * 24 * time.Hour)
-		fmt.Println(monday, sunday)
+		log.Println(monday, sunday)
 		q.Where("CAST(deadline AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)", monday, sunday)
 	}
 	if unassigned {

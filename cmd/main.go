@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"github.com/madflojo/tasks"
 	"github.com/oxanahr/discord-bot/cmd/bot"
 	"github.com/oxanahr/discord-bot/cmd/config"
 	"github.com/oxanahr/discord-bot/cmd/database"
 	"github.com/oxanahr/discord-bot/cmd/database/migrations"
 	"github.com/oxanahr/discord-bot/cmd/handlers"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -34,17 +34,23 @@ func main() {
 		Interval: 30 * time.Second,
 		//StartAfter: time.Now().Add(10 * time.Second), // run at X:00 every day?
 		TaskFunc: func() error {
-			handlers.PingUsers() //error handling
-			handlers.Summary()   //error handling
+			err := handlers.PingUsers()
+			if err != nil {
+				log.Println(err)
+			}
+			err = handlers.Summary()
+			if err != nil {
+				log.Println(err)
+			}
 			return nil
 		},
 	})
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
-	fmt.Println("Bot is running. Press Ctrl + C to exit.")
+	log.Println("Bot is running. Press Ctrl + C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc

@@ -9,6 +9,7 @@ import (
 	"github.com/oxanahr/discord-bot/cmd/context"
 	"github.com/oxanahr/discord-bot/cmd/models"
 	"github.com/oxanahr/discord-bot/cmd/utils"
+	"log"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -191,7 +192,7 @@ func Start() {
 
 			if opt, ok := optionMap["deadline"]; ok {
 				d, err := time.Parse("02/01/2006", opt.StringValue())
-				fmt.Println(d, err)
+				log.Println(d, err)
 				task.Deadline = &d
 			}
 
@@ -201,7 +202,6 @@ func Start() {
 			task.Create()
 
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				// Ignore type for now, they will be discussed in "responses"
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: fmt.Sprintf("Added task with id %d", task.ID),
@@ -509,18 +509,18 @@ func Start() {
 	})
 
 	context.Dg.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-		fmt.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
+		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
 	})
 
 	//handlers.AddHandlers()
 	context.OpenConnection()
 
-	fmt.Println("Adding commands...")
+	log.Println("Adding commands...")
 	registeredCommands = make([]*discordgo.ApplicationCommand, len(commands))
 	for i, v := range commands {
 		cmd, err := context.Dg.ApplicationCommandCreate(context.Dg.State.User.ID, GuildID, v)
 		if err != nil {
-			fmt.Printf("Cannot create '%v' command: %v", v.Name, err)
+			log.Printf("Cannot create '%v' command: %v", v.Name, err)
 		}
 		registeredCommands[i] = cmd
 	}
@@ -538,7 +538,7 @@ func Stop() {
 	for _, v := range registeredCommands {
 		err := context.Dg.ApplicationCommandDelete(context.Dg.State.User.ID, GuildID, v.ID)
 		if err != nil {
-			fmt.Printf("Cannot delete '%v' command: %v", v.Name, err)
+			log.Printf("Cannot delete '%v' command: %v", v.Name, err)
 		}
 	}
 

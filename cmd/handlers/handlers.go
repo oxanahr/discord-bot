@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/oxanahr/discord-bot/cmd/config"
 	"github.com/oxanahr/discord-bot/cmd/models"
 	"github.com/oxanahr/discord-bot/cmd/utils"
+	"log"
 	"strings"
 )
 
@@ -136,25 +138,30 @@ const help string = "```Current commands are:\n\ttasks\n\tadd task <task name>\n
 
 func PingUsers() error {
 	tasks, _ := models.GetTasksEndingTomorrow() //handle err
-	fmt.Println("ping")
+	log.Println("ping")
+
 	for _, t := range tasks {
 		msg := fmt.Sprintf("You have an incompleted task: ID: %d, Name: %s, Desc: %s", t.ID, t.Name, t.Description)
+		log.Println(msg)
 
-		fmt.Println(msg)
 		utils.SendPrivateMessage(*t.AssignedUserID, msg)
 	}
 	return nil
 }
 
 func Summary() error {
-	tasks, _ := models.GetInProgressTasks() //handle err
-	fmt.Println("summary")
+	tasks, err := models.GetInProgressTasks()
+	if err != nil {
+		log.Println("Failed getting tasks in progress status,", err)
+		return err
+	}
+	log.Println("summary")
 
 	msgs := []string{"In progress tasks:"}
 	for _, t := range tasks {
 		msgs = append(msgs, fmt.Sprintf("ID: %d, Name: %s, Desc: %s, Assignee: %s", t.ID, t.Name, t.Description, utils.Mention(*t.AssignedUserID)))
 	}
-	// get channel from config?
-	utils.SendChannelMessage("1071105457025974347", strings.Join(msgs, "\r\n"))
+
+	utils.SendChannelMessage(config.GetServerGeneralChannelID(), strings.Join(msgs, "\r\n"))
 	return nil
 }
