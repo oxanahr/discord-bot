@@ -7,9 +7,6 @@ import (
 )
 
 type configuration struct {
-	BotPrefix              string
-	BotStatus              string
-	BotGuildJoinMessage    string
 	DiscordToken           string
 	DBUser                 string
 	DBPassword             string
@@ -29,9 +26,6 @@ func Load() {
 		log.Fatalln(" ERROR: Error loading .env file")
 	}
 	config = &configuration{
-		BotPrefix:              os.Getenv("BOT_PREFIX"),
-		BotStatus:              os.Getenv("BOT_STATUS"),
-		BotGuildJoinMessage:    os.Getenv("BOT_GUILD_JOIN_MESSAGE"),
 		DiscordToken:           os.Getenv("DISCORD_TOKEN"),
 		DBUser:                 os.Getenv("DB_USER"),
 		DBPassword:             os.Getenv("DB_PASSWORD"),
@@ -40,14 +34,6 @@ func Load() {
 		DBPort:                 os.Getenv("DB_PORT"),
 		ServerGeneralChannelID: os.Getenv("SERVER_GENERAL_CHANNEL_ID"),
 	}
-}
-
-func GetBotPrefix() string {
-	return config.BotPrefix
-}
-
-func GetBotStatus() string {
-	return config.BotStatus
 }
 
 func GetServerGeneralChannelID() string {

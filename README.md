@@ -68,10 +68,7 @@ In order to run this project you will need the following:
 
     ```dotenv
     DISCORD_TOKEN="Your discord token"
-    BOT_PREFIX="Your prefix for bot commands"
-    SERVER_GENERAL_CHANNEL_ID="Your server general channel id"
-    BOT_GUILD_JOIN_MESSAGE="Your bot guild join message"
-    DISCORD_TOKEN="Your discord bot token"
+    SERVER_GENERAL_CHANNEL_ID="Discord server general channel id"
     DB_USER="Your database username"
     DB_PASSWORD="Your database password"
     DB_SCHEMA="Your database schema"

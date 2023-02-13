@@ -8,7 +8,7 @@ import (
 
 var Dg *discordgo.Session
 
-// Initialize Initializing discord session
+// Construct a new Discord client which can be used to access the variety of Discord API functions and to set callback functions for Discord events.
 func Initialize(discordToken string) {
 	var err error
 	Dg, err = discordgo.New("Bot " + discordToken)
