@@ -24,7 +24,7 @@
 
 
 ## About The Project
-This project is written for the purpose of practical acquaintance with the Golang programming language. Task Manager Bot is a Discord Bot that helps you to organize your tasks.
+This project has practical acquaintance purposes with the Golang programming language. Task Manager Bot is a Discord Bot that helps you to organize your tasks.
 
 ### Built With
 
@@ -36,7 +36,7 @@ This discord bot is built with:
 
 ## Getting Started
 
-To get a local copy up and running follow these simple example steps.
+To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
