@@ -19,10 +19,11 @@ var (
 func Start() {
 	rand.Seed(time.Now().UnixNano())
 	context.Initialize(config.GetDiscordToken())
-	context.OpenConnection()
 	handlers.ReadyHandler()
+	context.OpenConnection()
 	handlers.RegisterCommands()
 	handlers.MessageCreateHandler()
+
 }
 
 // Closes session with Discord API and deletes registered commands

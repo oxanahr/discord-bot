@@ -56,14 +56,27 @@ func MessageCreateHandler() {
 			if opt, ok := optionMap["assignee"]; ok {
 				task.AssignedUserID = &opt.UserValue(nil).ID
 			}
-			task.Create()
+			err := task.Create()
+			if err != nil {
+				if err != nil {
+					log.Println("FAIL: Create task action failed")
+				}
+			}
 
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			mes := fmt.Sprintf("Added task with id %d", task.ID)
+			if task.AssignedUserID != nil {
+				mes += fmt.Sprintf(" to %s ", utils.Mention(*task.AssignedUserID))
+			}
+
+			err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("Added task with id %d to %s", task.ID, utils.Mention(*task.AssignedUserID)),
+					Content: mes,
 				},
 			})
+			if err != nil {
+				log.Println("FAIL: Add task action failed")
+			}
 		},
 		"my-tasks": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			options := i.ApplicationCommandData().Options
@@ -86,7 +99,16 @@ func MessageCreateHandler() {
 			}
 
 			// Get tasks from DB
-			tasks, _ := models.GetTasks(&i.Member.User.ID, sort, soon, false)
+			var authorID string
+			if i.Member != nil {
+				authorID = i.Member.User.ID
+			} else {
+				authorID = i.User.ID
+			}
+			tasks, err := models.GetTasks(&authorID, sort, soon, false)
+			if err != nil {
+				log.Println("FAIL: Get my tasks action failed")
+			}
 			buf := new(bytes.Buffer)
 
 			// Construct a table
@@ -102,7 +124,7 @@ func MessageCreateHandler() {
 
 			// Print the response content as a table
 			table.Render()
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: fmt.Sprintf("```\r\n%s```", buf.String()),
@@ -110,7 +132,7 @@ func MessageCreateHandler() {
 			})
 
 			if err != nil {
-				panic(err)
+				log.Println("FAIL: Print my tasks action failed")
 			}
 		},
 		"all-tasks": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -138,7 +160,10 @@ func MessageCreateHandler() {
 				unassigned = option.BoolValue()
 			}
 
-			tasks, _ := models.GetTasks(nil, sort, soon, unassigned)
+			tasks, err := models.GetTasks(nil, sort, soon, unassigned)
+			if err != nil {
+				log.Println("FAIL: Get all tasks action failed")
+			}
 			buf := new(bytes.Buffer)
 			table := tablewriter.NewWriter(buf)
 			table.SetColWidth(21)
@@ -163,7 +188,7 @@ func MessageCreateHandler() {
 			}
 
 			table.Render()
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				// Ignore type for now, they will be discussed in "responses"
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
@@ -171,7 +196,7 @@ func MessageCreateHandler() {
 				},
 			})
 			if err != nil {
-				panic(err)
+				log.Println("FAIL: Print all tasks action failed")
 			}
 		},
 		"start-task": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -186,14 +211,20 @@ func MessageCreateHandler() {
 
 			if opt, ok := optionMap["id"]; ok {
 				id := opt.IntValue()
-				models.StartTask(uint64(id))
+				err := models.StartTask(uint64(id))
+				if err != nil {
+					log.Println("FAIL: Start task action failed")
+				}
 
-				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
 						Content: fmt.Sprintf("%s started task with id %d", utils.Mention(i.User.ID), id),
 					},
 				})
+				if err != nil {
+					log.Println("FAIL: Start task action failed")
+				}
 			}
 		},
 		"complete-task": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -208,15 +239,21 @@ func MessageCreateHandler() {
 
 			if opt, ok := optionMap["id"]; ok {
 				id := opt.IntValue()
-				models.CompleteTask(uint64(id))
+				err := models.CompleteTask(uint64(id))
+				if err != nil {
+					log.Println("FAIL: Complete task action failed")
+				}
 
-				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					// Ignore type for now, they will be discussed in "responses"
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
 						Content: fmt.Sprintf("Completed task with id %d", id),
 					},
 				})
+				if err != nil {
+					log.Println("FAIL: Complete task action failed")
+				}
 			}
 		},
 		"assign-task": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -233,15 +270,20 @@ func MessageCreateHandler() {
 				if optU, okU := optionMap["assignee"]; okU {
 					id := optID.IntValue()
 					userID := optU.UserValue(nil).ID
-					models.AssignTask(uint64(id), userID)
+					err := models.AssignTask(uint64(id), userID)
+					if err != nil {
+						log.Println("FAIL: Assign task action failed")
+					}
 
-					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-						// Ignore type for now, they will be discussed in "responses"
+					err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 						Type: discordgo.InteractionResponseChannelMessageWithSource,
 						Data: &discordgo.InteractionResponseData{
 							Content: fmt.Sprintf("Assigned task %d to %s", id, utils.Username(userID)),
 						},
 					})
+					if err != nil {
+						log.Println("FAIL: Assign task action failed")
+					}
 				}
 			}
 		},
@@ -258,20 +300,32 @@ func MessageCreateHandler() {
 			if optID, okID := optionMap["id"]; okID {
 				if optU, okU := optionMap["comment"]; okU {
 					taskID := uint64(optID.IntValue())
+					var authorID string
+					if i.Member != nil {
+						authorID = i.Member.User.ID
+					} else {
+						authorID = i.User.ID
+					}
+
 					comment := models.Comment{
 						TaskID:   taskID,
 						Text:     optU.StringValue(),
-						AuthorID: i.Member.User.ID,
+						AuthorID: authorID,
 					}
-					comment.Create()
+					err := comment.Create()
+					if err != nil {
+						log.Println("FAIL: Write comment action failed")
+					}
 
-					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-						// Ignore type for now, they will be discussed in "responses"
+					err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 						Type: discordgo.InteractionResponseChannelMessageWithSource,
 						Data: &discordgo.InteractionResponseData{
 							Content: fmt.Sprintf("%s commented on task %d", utils.Mention(i.Member.User.ID), taskID),
 						},
 					})
+					if err != nil {
+						log.Println("FAIL: Write comment action failed")
+					}
 				}
 			}
 		},
@@ -279,8 +333,11 @@ func MessageCreateHandler() {
 
 	componentsHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, id int64){
 		"start_task": func(s *discordgo.Session, i *discordgo.InteractionCreate, id int64) {
-			models.StartTask(uint64(id))
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			err := models.StartTask(uint64(id))
+			if err != nil {
+				log.Println("FAIL: Start task failed")
+			}
+			err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: fmt.Sprintf("Started task %d", id),
@@ -288,12 +345,15 @@ func MessageCreateHandler() {
 				},
 			})
 			if err != nil {
-				panic(err)
+				log.Println("FAIL: Responding to start task failed")
 			}
 		},
 		"complete_task": func(s *discordgo.Session, i *discordgo.InteractionCreate, id int64) {
-			models.CompleteTask(uint64(id))
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			err := models.CompleteTask(uint64(id))
+			if err != nil {
+				log.Println("FAIL: Complete task action failed")
+			}
+			err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: fmt.Sprintf("Completed task %d", id),
@@ -301,7 +361,7 @@ func MessageCreateHandler() {
 				},
 			})
 			if err != nil {
-				panic(err)
+				log.Println("FAIL: Responding to start task failed")
 			}
 		},
 	}
