@@ -24,14 +24,16 @@ func main() {
 
 	// Start the bot
 	bot.Start()
+	defer bot.Stop()
 
 	// Start the scheduler
 	scheduler := tasks.New()
 	defer scheduler.Stop()
 
+	// Add a task
 	_, err := scheduler.Add(&tasks.Task{
-		//Interval:   24 * time.Hour,
-		Interval: 30 * time.Second,
+		Interval: 1 * time.Hour,
+		//Interval: 30 * time.Second,
 		//StartAfter: time.Now().Add(10 * time.Second), // run at X:00 every day?
 		TaskFunc: func() error {
 			err := handlers.PingUsers()
@@ -45,7 +47,6 @@ func main() {
 			return nil
 		},
 	})
-
 	if err != nil {
 		log.Println(err)
 	}
@@ -54,6 +55,4 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-
-	bot.Stop()
 }
