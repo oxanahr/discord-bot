@@ -13,6 +13,7 @@ type Comment struct {
 	CreatedAt time.Time `json:"createdAt" gorm:"not null"`
 }
 
+// Create Writes to database's comments table and throws an error at failure
 func (t *Comment) Create() error {
 	t.CreatedAt = time.Now()
 	return database.DB.Create(t).Error

@@ -14,6 +14,7 @@ import (
 
 var DB *gorm.DB
 
+// Connect Tries to connect 5 times to the database
 func Connect() {
 	// Print Slow SQL and happening errors by default
 	var err error

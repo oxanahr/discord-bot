@@ -23,6 +23,7 @@ func SendPrivateMessage(userID string, message string) {
 	SendChannelMessage(channel.ID, message)
 }
 
+// Mention Returns the passed username with a prefix of @
 func Mention(userID string) string {
 	user, err := context.Dg.User(userID)
 	if err != nil {
@@ -32,6 +33,7 @@ func Mention(userID string) string {
 	return user.Mention()
 }
 
+// Username	Returns only the username
 func Username(userID string) string {
 	user, err := context.Dg.User(userID)
 	if err != nil {
@@ -41,6 +43,7 @@ func Username(userID string) string {
 	return user.Username
 }
 
+// Padding Calculates the offset needed to reach the maximum column width
 func Padding(s string, p int) int {
 	padding := 0
 	if len(s)%p != 0 {

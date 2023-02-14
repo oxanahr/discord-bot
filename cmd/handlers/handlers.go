@@ -20,6 +20,7 @@ var (
 	GuildID            = ""
 )
 
+// MessageCreateHandler will be called everytime a new message is sent in a channel the bot has access to
 func MessageCreateHandler() {
 	commandHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"add-task": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -84,11 +85,13 @@ func MessageCreateHandler() {
 				soon = option.BoolValue()
 			}
 
+			// Get tasks from DB
 			tasks, _ := models.GetTasks(&i.Member.User.ID, sort, soon, false)
 			buf := new(bytes.Buffer)
+
+			// Construct a table
 			table := tablewriter.NewWriter(buf)
 			table.SetHeader([]string{"ID", "Name", "Description", "Priority", "State", "Deadline"})
-			//components := []discordgo.MessageComponent{}
 			for _, t := range tasks {
 				deadline := ""
 				if t.Deadline != nil {
@@ -97,9 +100,9 @@ func MessageCreateHandler() {
 				table.Append([]string{strconv.FormatInt(int64(t.ID), 10), t.Name, t.Description, strconv.Itoa(t.Priority), t.State, deadline})
 			}
 
+			// Print the response content as a table
 			table.Render()
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				// Ignore type for now, they will be discussed in "responses"
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: fmt.Sprintf("```\r\n%s```", buf.String()),
@@ -186,10 +189,9 @@ func MessageCreateHandler() {
 				models.StartTask(uint64(id))
 
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-					// Ignore type for now, they will be discussed in "responses"
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
-						Content: fmt.Sprintf("Started task with id %d", id),
+						Content: fmt.Sprintf("%s started task with id %d", utils.Mention(i.User.ID), id),
 					},
 				})
 			}

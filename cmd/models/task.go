@@ -18,24 +18,29 @@ type Task struct {
 	Comments       []Comment  `json:"comments"`
 }
 
+// Create Writes to database's tasks table and throws an error at failure
 func (t *Task) Create() error {
 	t.State = "not_started"
 	t.CreatedAt = time.Now()
 	return database.DB.Create(t).Error
 }
 
+// StartTask Changes state from the default not_started to in_progress
 func StartTask(id uint64) error {
 	return database.DB.Model(&Task{}).Where("id = ?", id).Update("state", "in_progress").Error
 }
 
+// CompleteTask Changes state to completed
 func CompleteTask(id uint64) error {
 	return database.DB.Model(&Task{}).Where("id = ?", id).Update("state", "completed").Error
 }
 
+// AssignTask Assigns to a user
 func AssignTask(id uint64, userID string) error {
 	return database.DB.Model(&Task{}).Where("id = ?", id).Update("assigned_user_id", userID).Error
 }
 
+// GetTasks Returns all tasks filtered by parameters
 func GetTasks(assignedUserID *string, sort string, soon bool, unassigned bool) ([]Task, error) {
 	q := database.DB.Model(&Task{}).Preload("Comments").Where("state != ?", "completed")
 	if assignedUserID != nil {
@@ -66,6 +71,7 @@ func GetTasks(assignedUserID *string, sort string, soon bool, unassigned bool) (
 	return tasks, nil
 }
 
+// GetTasksEndingTomorrow Throws an error at failure
 func GetTasksEndingTomorrow() ([]Task, error) {
 	q := database.DB.Model(&Task{}).Preload("Comments").
 		Where("state != ?", "completed").
@@ -77,6 +83,7 @@ func GetTasksEndingTomorrow() ([]Task, error) {
 	return tasks, nil
 }
 
+// GetInProgressTasks Throws an error at failure
 func GetInProgressTasks() ([]Task, error) {
 	q := database.DB.Model(&Task{}).Preload("Comments").
 		Where("state = ?", "in_progress").
